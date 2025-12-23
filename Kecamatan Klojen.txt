@@ -1,0 +1,2 @@
+mentari cell,250000,2%
+warmindo,300000,2.5%
