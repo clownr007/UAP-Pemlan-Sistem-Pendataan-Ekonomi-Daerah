@@ -15,18 +15,15 @@ public class FormInputUMKM extends JFrame {
         this.parentHalaman = parent;
         this.namaDaerah = daerah;
 
-        setTitle("Input UMKM Baru - " + namaDaerah);
+        setTitle("Tambah UMKM - " + namaDaerah);
         setSize(500, 450);
         setLocationRelativeTo(null);
         getContentPane().setBackground(Color.WHITE);
-        setLayout(new BorderLayout()); // Layout rapi berbaris
+        setLayout(new BorderLayout());
 
-        txtNama = new JTextField();
-        txtPendapatan = new JTextField();
-        txtPersen = new JTextField();
-
+        // --- HEADER ---
         JPanel headerPanel = new JPanel();
-        headerPanel.setBackground(new Color(46, 125, 50)); // Hijau
+        headerPanel.setBackground(new Color(46, 125, 50));
         headerPanel.setPreferredSize(new Dimension(500, 60));
         JLabel lblJudul = new JLabel("TAMBAH DATA UMKM", JLabel.CENTER);
         lblJudul.setForeground(Color.WHITE);
@@ -34,75 +31,84 @@ public class FormInputUMKM extends JFrame {
         headerPanel.add(lblJudul);
         add(headerPanel, BorderLayout.NORTH);
 
+        // --- FORM ---
         JPanel formPanel = new JPanel(new GridLayout(3, 2, 15, 30));
         formPanel.setBackground(Color.WHITE);
-        // Memberi jarak agar tidak mentok ke pinggir (Atas, Kiri, Bawah, Kanan)
         formPanel.setBorder(new javax.swing.border.EmptyBorder(40, 60, 40, 60));
 
-        // --- Komponen GUI ---
-        formPanel.add(new JLabel("Nama UMKM:"));
-        formPanel.add(txtNama);
-        formPanel.add(new JLabel("Pendapatan (Rp):"));
-        formPanel.add(txtPendapatan);
-        formPanel.add(new JLabel("Tren Kenaikan (%):"));
-        formPanel.add(txtPersen);
+        txtNama = new JTextField();
+        txtPendapatan = new JTextField();
+        txtPersen = new JTextField();
 
+        formPanel.add(new JLabel("Nama UMKM:")); formPanel.add(txtNama);
+        formPanel.add(new JLabel("Pendapatan (Rp):")); formPanel.add(txtPendapatan);
+        formPanel.add(new JLabel("Tren Kenaikan (%):")); formPanel.add(txtPersen);
         add(formPanel, BorderLayout.CENTER);
 
+        // --- TOMBOL ---
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
         buttonPanel.setBackground(Color.WHITE);
 
+        // Tombol Batal (Latar Merah)
+        JButton btnBatal = new JButton("Batal");
+        btnBatal.setPreferredSize(new Dimension(110, 40));
+        btnBatal.setBackground(new Color(244, 67, 54)); // MERAH
+        btnBatal.setForeground(Color.WHITE);
+        btnBatal.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnBatal.setFocusPainted(false); // Menghilangkan garis fokus agar lebih rapi
+
+        // Tombol Simpan (Latar Hijau)
         JButton btnSimpan = new JButton("Simpan Data");
         btnSimpan.setPreferredSize(new Dimension(130, 40));
-
-        JButton btnBatal = new JButton("Batal");
-        btnBatal.setPreferredSize(new Dimension(100, 40));
+        btnSimpan.setBackground(new Color(46, 125, 50)); // HIJAU
+        btnSimpan.setForeground(Color.WHITE);
+        btnSimpan.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnSimpan.setFocusPainted(false);
 
         buttonPanel.add(btnBatal);
         buttonPanel.add(btnSimpan);
         add(buttonPanel, BorderLayout.SOUTH);
 
-
-        // --- Logika Simpan ---
-        btnSimpan.addActionListener(e -> simpanData());
-
+        // --- LOGIKA ---
         btnBatal.addActionListener(e -> dispose());
-    }
 
-    private void simpanData() {
-        String nama = txtNama.getText();
-        String pendapatanStr = txtPendapatan.getText();
-        String persenStr = txtPersen.getText();
+        btnSimpan.addActionListener(e -> {
+            String nama = txtNama.getText();
+            // Membersihkan titik jika user mengetik manual (misal: 1.000.000 -> 1000000)
+            String pendapatanRaw = txtPendapatan.getText().replace(".", "");
+            String persenRaw = txtPersen.getText().replace("%", "");
 
-        // 1. Validasi Input Kosong
-        if (nama.isEmpty() || pendapatanStr.isEmpty() || persenStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Semua kolom harus diisi!", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            // 1. Validasi Input Kosong
+            if (nama.isEmpty() || pendapatanRaw.isEmpty() || persenRaw.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Isi semua kolom!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
-        // 2. Exception Handling (Modul 6): Validasi Angka
-        try {
-            Double.parseDouble(pendapatanStr); // Cek apakah pendapatan angka
-            Double.parseDouble(persenStr);    // Cek apakah persen angka
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Pendapatan dan Persen harus berupa angka!", "Input Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            // 2. Tambahan: Validasi Angka agar program tidak crash saat load data
+            try {
+                Long.parseLong(pendapatanRaw);
+                Double.parseDouble(persenRaw);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Pendapatan dan Tren harus berupa angka!", "Kesalahan Input", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        // 3. File Handling (Modul 5): Simpan ke file daerah terkait
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(namaDaerah + ".txt", true))) {
-            // Format simpan: Nama,Pendapatan,Persen
-            bw.write(nama + "," + pendapatanStr + "," + persenStr + "%");
-            bw.newLine();
+            // 3. Simpan ke File
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(namaDaerah + ".txt", true))) {
+                // Simpan data murni tanpa titik (titik hanya untuk tampilan di tabel)
+                bw.write(nama + "," + pendapatanRaw + "," + persenRaw + "%");
+                bw.newLine();
 
-            JOptionPane.showMessageDialog(this, "Data UMKM berhasil disimpan di " + namaDaerah);
+                JOptionPane.showMessageDialog(this, "Data Berhasil Disimpan!");
 
-            // Refresh tabel di halaman sebelumnya
-            parentHalaman.loadDataFromFile();
-            dispose(); // Tutup form input
+                // 4. Refresh Tabel di Halaman Utama (Agar responsif)
+                parentHalaman.loadDataFromFile();
 
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Gagal menyimpan ke file: " + ex.getMessage());
-        }
+                // 5. Tutup Jendela Input
+                dispose();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Gagal menyimpan data: " + ex.getMessage());
+            }
+        });
     }
 }

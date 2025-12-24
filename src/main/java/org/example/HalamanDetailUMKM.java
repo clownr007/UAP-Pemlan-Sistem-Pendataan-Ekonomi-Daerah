@@ -33,20 +33,20 @@ public class HalamanDetailUMKM extends JFrame {
         JPanel card = new JPanel(new GridLayout(5, 1, 0, 15));
         card.setBackground(Color.WHITE);
 
-// 2. Membuat bingkai abu-abu tipis dan jarak di dalamnya (Padding)
+        // 2. Membuat bingkai abu-abu tipis dan jarak di dalamnya (Padding)
         card.setBorder(javax.swing.BorderFactory.createCompoundBorder(
                 new javax.swing.border.EmptyBorder(20, 25, 20, 25),
                 javax.swing.BorderFactory.createLineBorder(new Color(230, 230, 230), 1)
         ));
 
-// 3. Memasukkan data proyeksi satu per satu secara lengkap
+        // 3. Memasukkan data proyeksi satu per satu secara lengkap
         card.add(createRow("NAMA UMKM", nama));
         card.add(createRow("PROYEKSI PENDAPATAN 1 HARI", "Rp " + formatRupiah(pendapatanHarian)));
         card.add(createRow("ESTIMASI PENDAPATAN 1 MINGGU", "Rp " + formatRupiah(pendapatanHarian * 7)));
         card.add(createRow("ESTIMASI PENDAPATAN 1 BULAN", "Rp " + formatRupiah(pendapatanHarian * 30)));
         card.add(createRow("ESTIMASI PENDAPATAN 1 TAHUN", "Rp " + formatRupiah(pendapatanHarian * 365)));
 
-// 4. Masukkan kartu data ke tengah layar
+        // 4. Masukkan kartu data ke tengah layar
         add(card, BorderLayout.CENTER);
 
         // --- Tombol Tutup ---
@@ -55,12 +55,12 @@ public class HalamanDetailUMKM extends JFrame {
         add(btnTutup, BorderLayout.SOUTH);
     }
 
-    // Helper untuk merapikan format angka
-    private String formatRupiah(double nilai) {
+        // Helper untuk merapikan format angka
+        private String formatRupiah(double nilai) {
         return String.format("%,.0f", nilai);
     }
 
-    private JPanel createRow(String label, String value) {
+        private JPanel createRow(String label, String value) {
         JPanel rowPanel = new JPanel(new BorderLayout());
         rowPanel.setBackground(Color.WHITE);
 

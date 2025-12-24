@@ -1,9 +1,12 @@
 package org.example;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.*;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class HalamanUMKM extends JFrame {
     private JTable table;
@@ -13,12 +16,12 @@ public class HalamanUMKM extends JFrame {
     public HalamanUMKM(String daerah) {
         this.namaDaerah = daerah;
         setTitle("Data UMKM - " + namaDaerah);
-        setSize(800, 550); // Ukuran sedikit lebih tinggi untuk estetika
+        setSize(800, 550);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(15, 15));
 
-        // 1. HEADER (Warna Hijau Dashboard)
+        // 1. HEADER
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(46, 125, 50));
         headerPanel.setPreferredSize(new Dimension(800, 70));
@@ -35,17 +38,25 @@ public class HalamanUMKM extends JFrame {
             @Override
             public boolean isCellEditable(int r, int c) { return false; }
         };
+
         table = new JTable(model);
-        table.setRowHeight(35);
+        table.setRowHeight(40); // Tinggi baris agar lebih lega
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
-        table.setCellSelectionEnabled(true);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.getColumnModel().getSelectionModel().addListSelectionListener(e -> {
-            if (table.getSelectedColumn() != 0 && table.getSelectedColumn() != -1) {
-                table.setColumnSelectionInterval(0, 0);
-            }
-        });
+        // --- PERBAIKAN BORDER TEBAL & GAYA TABEL ---
+        table.setCellSelectionEnabled(false);      // Diubah ke false agar tidak muncul border sel individu
+        table.setRowSelectionAllowed(true);       // Agar satu baris utuh terseleksi
+        table.setFocusable(false);                // Menghilangkan garis fokus (garis tebal saat diklik)
+        table.setShowGrid(true);                  // Menampilkan garis kisi
+        table.setGridColor(new Color(230, 230, 230)); // Warna garis kisi yang halus
+        table.setIntercellSpacing(new Dimension(0, 1)); // Menghilangkan double border vertikal
+
+        // Pengaturan agar teks di kolom 1 (Pendapatan) dan 2 (Tren) berada di tengah
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        table.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
+        table.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
+        // --------------------------------------------
 
         JPanel tablePanel = new JPanel(new BorderLayout());
         tablePanel.setBackground(Color.WHITE);
@@ -53,7 +64,7 @@ public class HalamanUMKM extends JFrame {
         tablePanel.add(new JScrollPane(table), BorderLayout.CENTER);
         add(tablePanel, BorderLayout.CENTER);
 
-        // 3. PANEL TOMBOL (Aksi)
+        // 3. PANEL TOMBOL
         JPanel panelAksi = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         panelAksi.setBackground(Color.WHITE);
         panelAksi.setBorder(new javax.swing.border.EmptyBorder(0, 0, 20, 0));
@@ -69,11 +80,11 @@ public class HalamanUMKM extends JFrame {
         panelAksi.add(btnTambah);
         add(panelAksi, BorderLayout.SOUTH);
 
-        // --- LOGIKA TOMBOL HAPUS ---
+        // LOGIKA TOMBOL
         btnHapus.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row != -1) {
-                int confirm = showCustomConfirm("yakin ingin menghapus data?");
+                int confirm = showCustomConfirm("Yakin ingin menghapus data?");
                 if (confirm == JOptionPane.YES_OPTION) {
                     hapusDataBaris(row);
                     loadDataFromFile();
@@ -84,20 +95,16 @@ public class HalamanUMKM extends JFrame {
             }
         });
 
-        // --- LOGIKA TOMBOL UPDATE (MENGGUNAKAN DIALOG CUSTOM) ---
         btnUpdate.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row != -1) {
-                // Ambil data lama dari tabel
                 String namaLama = model.getValueAt(row, 0).toString();
-                String pendapatanLama = model.getValueAt(row, 1).toString();
+                String pendapatanLama = model.getValueAt(row, 1).toString().replace(".", "");
                 String trenLama = model.getValueAt(row, 2).toString();
 
-                // Buka Dialog Update dengan desain seperti Form Input
                 UpdateDialog dialog = new UpdateDialog(this, namaLama, pendapatanLama, trenLama);
                 dialog.setVisible(true);
 
-                // Jika user menekan Simpan dan validasi lolos
                 if (dialog.isUpdated()) {
                     updateDataDiFile(row, dialog.getDataBaru());
                     loadDataFromFile();
@@ -108,15 +115,11 @@ public class HalamanUMKM extends JFrame {
             }
         });
 
-        loadDataFromFile();
+        btnTambah.addActionListener(e -> new FormInputUMKM(this, namaDaerah).setVisible(true));
 
         btnKembali.addActionListener(e -> {
             new EkonomiHome().setVisible(true);
             this.dispose();
-        });
-
-        btnTambah.addActionListener(e -> {
-            new FormInputUMKM(this, namaDaerah).setVisible(true);
         });
 
         table.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -127,15 +130,24 @@ public class HalamanUMKM extends JFrame {
                     int row = table.getSelectedRow();
                     if (row != -1) {
                         String nama = model.getValueAt(row, 0).toString();
-                        String pendapatan = model.getValueAt(row, 1).toString();
+                        String pendapatan = model.getValueAt(row, 1).toString().replace(".", "");
                         new HalamanDetailUMKM(nama, pendapatan).setVisible(true);
                     }
                 }
             }
         });
+
+        loadDataFromFile();
     }
 
-    // --- FUNGSI HELPER TOMBOL ---
+    private String formatRupiah(String nominal) {
+        try {
+            double value = Double.parseDouble(nominal.replace(".", ""));
+            NumberFormat nf = NumberFormat.getInstance(new Locale("id", "ID"));
+            return nf.format(value);
+        } catch (Exception e) { return nominal; }
+    }
+
     private JButton createStyledButton(String text, Color bg) {
         JButton btn = new JButton(text);
         btn.setBackground(bg);
@@ -146,28 +158,25 @@ public class HalamanUMKM extends JFrame {
         return btn;
     }
 
-    // --- METODE HELPER (LOGIKA FILE & UI) ---
     public void loadDataFromFile() {
         model.setRowCount(0);
-        String fileName = namaDaerah + ".txt";
-        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+        File file = new File(namaDaerah + ".txt");
+        if (!file.exists()) return;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
+                if (data.length >= 2) {
+                    data[1] = formatRupiah(data[1]);
+                }
                 model.addRow(data);
             }
-        } catch (IOException e) {
-            // File mungkin belum ada
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
-    private void hapusDataBaris(int index) {
-        prosesFile(index, null);
-    }
-
-    private void updateDataDiFile(int index, String dataBaru) {
-        prosesFile(index, dataBaru);
-    }
+    private void hapusDataBaris(int index) { prosesFile(index, null); }
+    private void updateDataDiFile(int index, String dataBaru) { prosesFile(index, dataBaru); }
 
     private void prosesFile(int targetIndex, String dataBaru) {
         File fileAsli = new File(namaDaerah + ".txt");
@@ -194,10 +203,6 @@ public class HalamanUMKM extends JFrame {
     }
 
     private int showCustomConfirm(String pesan) {
-        UIManager.put("OptionPane.background", Color.WHITE);
-        UIManager.put("Panel.background", Color.WHITE);
-        UIManager.put("Button.background", new Color(46, 125, 50));
-        UIManager.put("Button.foreground", Color.WHITE);
         return JOptionPane.showConfirmDialog(this, pesan, "Konfirmasi",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
     }
@@ -207,7 +212,6 @@ public class HalamanUMKM extends JFrame {
     }
 }
 
-// --- CLASS DIALOG UPDATE (DESAIN MIRIP TAMBAH DATA) ---
 class UpdateDialog extends JDialog {
     private JTextField fNama, fPendapatan, fTren;
     private boolean isUpdated = false;
@@ -258,15 +262,18 @@ class UpdateDialog extends JDialog {
 
         JButton btnBatal = new JButton("Batal");
         btnBatal.setPreferredSize(new Dimension(100, 40));
+        btnBatal.setBackground(new Color(244, 67, 54)); // MERAH
+        btnBatal.setForeground(Color.WHITE);
+        btnBatal.setFocusPainted(false);
 
         JButton btnSimpan = new JButton("Simpan");
         btnSimpan.setPreferredSize(new Dimension(100, 40));
-        btnSimpan.setBackground(new Color(46, 125, 50));
+        btnSimpan.setBackground(new Color(46, 125, 50)); // HIJAU
         btnSimpan.setForeground(Color.WHITE);
+        btnSimpan.setFocusPainted(false);
 
         btnSimpan.addActionListener(e -> {
-            // VALIDASI: Pendapatan harus angka
-            if (!fPendapatan.getText().matches("\\d+")) {
+            if (!fPendapatan.getText().replace(".", "").matches("\\d+")) {
                 JOptionPane.showMessageDialog(this, "Pendapatan harus berupa angka!", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
                 isUpdated = true;
@@ -275,12 +282,13 @@ class UpdateDialog extends JDialog {
         });
 
         btnBatal.addActionListener(e -> dispose());
-
         footer.add(btnBatal);
         footer.add(btnSimpan);
         add(footer, BorderLayout.SOUTH);
     }
 
     public boolean isUpdated() { return isUpdated; }
-    public String getDataBaru() { return fNama.getText() + "," + fPendapatan.getText() + "," + fTren.getText(); }
+    public String getDataBaru() {
+        return fNama.getText() + "," + fPendapatan.getText().replace(".", "") + "," + fTren.getText();
+    }
 }
