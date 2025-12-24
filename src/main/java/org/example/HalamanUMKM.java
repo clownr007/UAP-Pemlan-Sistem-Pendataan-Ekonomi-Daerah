@@ -21,7 +21,6 @@ public class HalamanUMKM extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(15, 15));
 
-        // 1. HEADER
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(46, 125, 50));
         headerPanel.setPreferredSize(new Dimension(800, 70));
@@ -32,7 +31,6 @@ public class HalamanUMKM extends JFrame {
         headerPanel.add(lblJudul, BorderLayout.CENTER);
         add(headerPanel, BorderLayout.NORTH);
 
-        // 2. TABEL UMKM
         String[] columns = {"Nama UMKM", "Pendapatan (Rp)", "Tren (%)"};
         model = new DefaultTableModel(columns, 0) {
             @Override
@@ -43,20 +41,17 @@ public class HalamanUMKM extends JFrame {
         table.setRowHeight(40); // Tinggi baris agar lebih lega
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
-        // --- PERBAIKAN BORDER TEBAL & GAYA TABEL ---
-        table.setCellSelectionEnabled(false);      // Diubah ke false agar tidak muncul border sel individu
-        table.setRowSelectionAllowed(true);       // Agar satu baris utuh terseleksi
-        table.setFocusable(false);                // Menghilangkan garis fokus (garis tebal saat diklik)
-        table.setShowGrid(true);                  // Menampilkan garis kisi
-        table.setGridColor(new Color(230, 230, 230)); // Warna garis kisi yang halus
-        table.setIntercellSpacing(new Dimension(0, 1)); // Menghilangkan double border vertikal
+        table.setCellSelectionEnabled(false);
+        table.setRowSelectionAllowed(true);
+        table.setFocusable(false);
+        table.setShowGrid(true);
+        table.setGridColor(new Color(230, 230, 230));
+        table.setIntercellSpacing(new Dimension(0, 1));
 
-        // Pengaturan agar teks di kolom 1 (Pendapatan) dan 2 (Tren) berada di tengah
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         table.getColumnModel().getColumn(1).setCellRenderer(centerRenderer);
         table.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
-        // --------------------------------------------
 
         JPanel tablePanel = new JPanel(new BorderLayout());
         tablePanel.setBackground(Color.WHITE);
@@ -64,7 +59,6 @@ public class HalamanUMKM extends JFrame {
         tablePanel.add(new JScrollPane(table), BorderLayout.CENTER);
         add(tablePanel, BorderLayout.CENTER);
 
-        // 3. PANEL TOMBOL
         JPanel panelAksi = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
         panelAksi.setBackground(Color.WHITE);
         panelAksi.setBorder(new javax.swing.border.EmptyBorder(0, 0, 20, 0));
@@ -80,7 +74,6 @@ public class HalamanUMKM extends JFrame {
         panelAksi.add(btnTambah);
         add(panelAksi, BorderLayout.SOUTH);
 
-        // LOGIKA TOMBOL
         btnHapus.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row != -1) {
