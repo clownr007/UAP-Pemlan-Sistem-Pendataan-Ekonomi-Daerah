@@ -16,29 +16,52 @@ public class FormInputUMKM extends JFrame {
         this.namaDaerah = daerah;
 
         setTitle("Input UMKM Baru - " + namaDaerah);
-        setSize(400, 300);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setSize(500, 450);
         setLocationRelativeTo(null);
-        setLayout(new GridLayout(5, 2, 10, 10)); // Layout rapi berbaris
+        getContentPane().setBackground(Color.WHITE);
+        setLayout(new BorderLayout()); // Layout rapi berbaris
+
+        txtNama = new JTextField();
+        txtPendapatan = new JTextField();
+        txtPersen = new JTextField();
+
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(new Color(46, 125, 50)); // Hijau
+        headerPanel.setPreferredSize(new Dimension(500, 60));
+        JLabel lblJudul = new JLabel("TAMBAH DATA UMKM", JLabel.CENTER);
+        lblJudul.setForeground(Color.WHITE);
+        lblJudul.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        headerPanel.add(lblJudul);
+        add(headerPanel, BorderLayout.NORTH);
+
+        JPanel formPanel = new JPanel(new GridLayout(3, 2, 15, 30));
+        formPanel.setBackground(Color.WHITE);
+        // Memberi jarak agar tidak mentok ke pinggir (Atas, Kiri, Bawah, Kanan)
+        formPanel.setBorder(new javax.swing.border.EmptyBorder(40, 60, 40, 60));
 
         // --- Komponen GUI ---
-        add(new JLabel(" Nama UMKM:"));
-        txtNama = new JTextField();
-        add(txtNama);
+        formPanel.add(new JLabel("Nama UMKM:"));
+        formPanel.add(txtNama);
+        formPanel.add(new JLabel("Pendapatan (Rp):"));
+        formPanel.add(txtPendapatan);
+        formPanel.add(new JLabel("Tren Kenaikan (%):"));
+        formPanel.add(txtPersen);
 
-        add(new JLabel(" Pendapatan (Rp):"));
-        txtPendapatan = new JTextField();
-        add(txtPendapatan);
+        add(formPanel, BorderLayout.CENTER);
 
-        add(new JLabel(" Tren Kenaikan (%):"));
-        txtPersen = new JTextField();
-        add(txtPersen);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        buttonPanel.setBackground(Color.WHITE);
 
         JButton btnSimpan = new JButton("Simpan Data");
-        JButton btnBatal = new JButton("Batal");
+        btnSimpan.setPreferredSize(new Dimension(130, 40));
 
-        add(btnBatal);
-        add(btnSimpan);
+        JButton btnBatal = new JButton("Batal");
+        btnBatal.setPreferredSize(new Dimension(100, 40));
+
+        buttonPanel.add(btnBatal);
+        buttonPanel.add(btnSimpan);
+        add(buttonPanel, BorderLayout.SOUTH);
+
 
         // --- Logika Simpan ---
         btnSimpan.addActionListener(e -> simpanData());

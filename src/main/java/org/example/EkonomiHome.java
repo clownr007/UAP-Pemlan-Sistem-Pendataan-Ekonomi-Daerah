@@ -16,10 +16,13 @@ public class EkonomiHome extends JFrame {
         setLayout(new BorderLayout(15, 15));
 
         // --- Header ---
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(new Color(46, 125, 50)); // Warna Hijau Tua
         JLabel labelJudul = new JLabel("DASHBOARD EKONOMI DAERAH", JLabel.CENTER);
-        labelJudul.setFont(new Font("SansSerif", Font.BOLD, 22));
-        labelJudul.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        add(labelJudul, BorderLayout.NORTH);
+        labelJudul.setForeground(Color.WHITE); // Teks jadi putih
+        labelJudul.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        headerPanel.add(labelJudul);
+        add(headerPanel, BorderLayout.NORTH);
 
         // --- Tabel ---
         String[] columns = {"Nama Daerah", "Total Pendapatan (Rp)", "Rata-rata Tren (%)"};
@@ -31,9 +34,23 @@ public class EkonomiHome extends JFrame {
         table = new JTable(model);
         table.setRowHeight(40); // Baris lebih tinggi agar mudah diklik
         table.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        table.setCellSelectionEnabled(true);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        table.getColumnModel().getSelectionModel().addListSelectionListener(e -> {
+            if (table.getSelectedColumn() != 0 && table.getSelectedColumn() != -1) {
+                // Jika user klik kolom lain, paksa balik ke kolom 0
+                table.setColumnSelectionInterval(0, 0);
+            }
+        });
+
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.setBackground(Color.WHITE);
+
+        // Angka 80 di bawah ini yang membuat tabel tidak mentok pinggir (berada di tengah)
+        centerPanel.setBorder(new javax.swing.border.EmptyBorder(30, 80, 30, 80));
+        centerPanel.add(new JScrollPane(table), BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
 
         // --- Footer Informasi ---
         JLabel lblInfo = new JLabel(" * Klik 2x pada nama daerah untuk melihat detail UMKM", JLabel.LEFT);
@@ -50,17 +67,21 @@ public class EkonomiHome extends JFrame {
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                // Menggunakan double click (2 kali klik) agar tidak sengaja terpencet
-                if (e.getClickCount() == 2) {
-                    int row = table.getSelectedRow();
-                    if (row != -1) {
-                        String namaDaerah = model.getValueAt(row, 0).toString();
+                // Ambil indeks kolom yang benar-benar diklik oleh mouse
+                int columnUnderMouse = table.columnAtPoint(e.getPoint());
 
-                        // Berpindah ke Halaman UMKM
-                        new HalamanUMKM(namaDaerah).setVisible(true);
-                        dispose(); // Menutup halaman utama
+                // HANYA jalan jika klik dilakukan di kolom 0 (Nama Daerah)
+                if (columnUnderMouse == 0) {
+                    if (e.getClickCount() == 2) { // Double click
+                        int row = table.getSelectedRow();
+                        if (row != -1) {
+                            String namaDaerah = model.getValueAt(row, 0).toString();
+                            new HalamanUMKM(namaDaerah).setVisible(true);
+                            dispose();
+                        }
                     }
                 }
+                // Jika klik di kolom 1 atau 2, program diam saja (tidak ada interaksi)
             }
         });
     }

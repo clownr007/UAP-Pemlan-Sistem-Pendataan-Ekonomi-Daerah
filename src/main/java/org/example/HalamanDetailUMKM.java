@@ -29,25 +29,25 @@ public class HalamanDetailUMKM extends JFrame {
         add(lblJudul, BorderLayout.NORTH);
 
         // --- Panel Data (Grid Layout) ---
-        JPanel panelData = new JPanel(new GridLayout(5, 2, 10, 10));
-        panelData.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        // 1. Membuat Panel kartu dengan susunan vertikal (5 baris ke bawah)
+        JPanel card = new JPanel(new GridLayout(5, 1, 0, 15));
+        card.setBackground(Color.WHITE);
 
-        panelData.add(new JLabel("Nama UMKM:"));
-        panelData.add(new JLabel(namaUMKM));
+// 2. Membuat bingkai abu-abu tipis dan jarak di dalamnya (Padding)
+        card.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                new javax.swing.border.EmptyBorder(20, 25, 20, 25),
+                javax.swing.BorderFactory.createLineBorder(new Color(230, 230, 230), 1)
+        ));
 
-        panelData.add(new JLabel("Pendapatan 1 Hari:"));
-        panelData.add(new JLabel("Rp " + formatRupiah(pendapatanHarian)));
+// 3. Memasukkan data proyeksi satu per satu secara lengkap
+        card.add(createRow("NAMA UMKM", nama));
+        card.add(createRow("PROYEKSI PENDAPATAN 1 HARI", "Rp " + formatRupiah(pendapatanHarian)));
+        card.add(createRow("ESTIMASI PENDAPATAN 1 MINGGU", "Rp " + formatRupiah(pendapatanHarian * 7)));
+        card.add(createRow("ESTIMASI PENDAPATAN 1 BULAN", "Rp " + formatRupiah(pendapatanHarian * 30)));
+        card.add(createRow("ESTIMASI PENDAPATAN 1 TAHUN", "Rp " + formatRupiah(pendapatanHarian * 365)));
 
-        panelData.add(new JLabel("Estimasi 1 Minggu (7 hari):"));
-        panelData.add(new JLabel("Rp " + formatRupiah(pendapatanHarian * 7)));
-
-        panelData.add(new JLabel("Estimasi 1 Bulan (30 hari):"));
-        panelData.add(new JLabel("Rp " + formatRupiah(pendapatanHarian * 30)));
-
-        panelData.add(new JLabel("Estimasi 1 Tahun (365 hari):"));
-        panelData.add(new JLabel("Rp " + formatRupiah(pendapatanHarian * 365)));
-
-        add(panelData, BorderLayout.CENTER);
+// 4. Masukkan kartu data ke tengah layar
+        add(card, BorderLayout.CENTER);
 
         // --- Tombol Tutup ---
         JButton btnTutup = new JButton("Tutup Detail");
@@ -60,4 +60,23 @@ public class HalamanDetailUMKM extends JFrame {
         return String.format("%,.0f", nilai);
     }
 
+    private JPanel createRow(String label, String value) {
+        JPanel rowPanel = new JPanel(new BorderLayout());
+        rowPanel.setBackground(Color.WHITE);
+
+        // Label keterangan (kecil di atas)
+        JLabel lblKet = new JLabel(label);
+        lblKet.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblKet.setForeground(Color.GRAY);
+
+        // Nilai uang (tebal di bawah)
+        JLabel lblVal = new JLabel(value);
+        lblVal.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblVal.setForeground(new Color(46, 125, 50));
+
+        rowPanel.add(lblKet, BorderLayout.NORTH);
+        rowPanel.add(lblVal, BorderLayout.SOUTH);
+
+        return rowPanel;
+    }
 }
