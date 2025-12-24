@@ -1,3 +1,2 @@
 sinar jaya,1000000,2%
 sinar mulya,200000,1.5%
-PT muwani,100000000,45%
